@@ -1,10 +1,12 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '../../../test-utils/testing-library-utils';
+
 import userEvent from '@testing-library/user-event';
 import { OrderDetailsProvider } from '../../../contexts/OrderDetails';
 import Options from '../Options';
+import OrderEntry from '../OrderEntry';
 
 test('update scoop subtotal when scoops change', async () => {
-	render(<Options optionType="scoops" />, { wrapper: OrderDetailsProvider });
+	render(<Options optionType="scoops" />);
 
 	//make sure total starts at $0.00
 	const scoopsSubtotal = screen.getByText('Scoops total: $', { exact: false });
@@ -25,7 +27,7 @@ test('update scoop subtotal when scoops change', async () => {
 });
 
 test('update toppings subtotal when toppings change', async () => {
-	render(<Options optionType="toppings" />, { wrapper: OrderDetailsProvider });
+	render(<Options optionType="toppings" />);
 
 	const toppingsSubtotal = screen.getByText('Toppings total: $', { exact: false });
 
@@ -57,4 +59,64 @@ test('update toppings subtotal when toppings change', async () => {
 	userEvent.click(checkbox);
 	expect(checkbox).not.toBeChecked();
 	expect(toppingsSubtotal).toHaveTextContent('0.00');
+});
+
+describe('grand total', () => {
+	test('grand total starts at $0.00', async () => {
+		render(<OrderEntry />);
+		const grandTotal = await screen.findByTestId('grand-total');
+		expect(grandTotal).toHaveTextContent('Grand Total: $0.00');
+	});
+
+	test('grand total updates properly if scoop is added first', async () => {
+		render(<OrderEntry />);
+		const grandTotal = await screen.findByTestId('grand-total');
+		const vanillaInput = await screen.findByRole('spinbutton', { name: 'Vanilla' });
+
+		userEvent.clear(vanillaInput);
+		userEvent.type(vanillaInput, '1');
+
+		expect(grandTotal).toHaveTextContent('2.00');
+
+		const hotFudge = await screen.findByTestId('toppings-Hot fudge');
+		userEvent.click(hotFudge);
+		expect(grandTotal).toHaveTextContent('3.50');
+	});
+
+	test('grand total updates properly if topping is added first', async () => {
+		render(<OrderEntry />);
+		const grandTotal = await screen.findByTestId('grand-total');
+
+		const hotFudge = await screen.findByTestId('toppings-Hot fudge');
+		userEvent.click(hotFudge);
+		expect(grandTotal).toHaveTextContent('1.50');
+
+		const vanillaInput = await screen.findByRole('spinbutton', { name: 'Vanilla' });
+
+		userEvent.clear(vanillaInput);
+		userEvent.type(vanillaInput, '1');
+
+		expect(grandTotal).toHaveTextContent('3.50');
+	});
+
+	test('grand total updates properly if item is removed', async () => {
+		render(<OrderEntry />);
+		const grandTotal = await screen.findByTestId('grand-total');
+
+		const hotFudge = await screen.findByTestId('toppings-Hot fudge');
+		userEvent.click(hotFudge);
+
+		const vanillaInput = await screen.findByRole('spinbutton', { name: 'Vanilla' });
+
+		userEvent.clear(vanillaInput);
+		userEvent.type(vanillaInput, '1');
+
+		userEvent.clear(vanillaInput);
+		userEvent.type(vanillaInput, '0');
+
+		expect(grandTotal).toHaveTextContent('1.50');
+
+		userEvent.click(hotFudge);
+		expect(grandTotal).toHaveTextContent('0.00');
+	});
 });
