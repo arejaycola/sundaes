@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '../../../test-utils/testing-library-uti
 import OrderEntry from '../OrderEntry';
 import { rest } from 'msw';
 import { server } from '../../../mocks/server';
+import { WorkflowProvider } from '../../../contexts/Workflow';
 
 test('handles errors for scoops and toppings routes', async () => {
 	server.resetHandlers(
@@ -9,7 +10,11 @@ test('handles errors for scoops and toppings routes', async () => {
 		rest.get('http://localhost:3030/toppings', (req, res, ctx) => res(ctx.status(500)))
 	);
 
-	render(<OrderEntry />);
+	render(
+		<WorkflowProvider>
+			<OrderEntry />
+		</WorkflowProvider>
+	);
 
 	await waitFor(async () => {
 		const alerts = await screen.findAllByRole('alert');

@@ -1,15 +1,16 @@
 import Container from 'react-bootstrap/Container';
-import OrderEntry from './pages/entry/OrderEntry';
 import { OrderDetailsProvider } from './contexts/OrderDetails';
-import SummaryForm from './pages/summary/SummaryForm';
+import { WorkflowProvider } from './contexts/Workflow';
+import Order from './pages/Order';
 
 function App() {
 	return (
 		<Container>
-			<OrderDetailsProvider>
-				<OrderEntry />
-				<SummaryForm />
-			</OrderDetailsProvider>
+			<WorkflowProvider>
+				<OrderDetailsProvider>
+					<Order />
+				</OrderDetailsProvider>
+			</WorkflowProvider>
 		</Container>
 	);
 }

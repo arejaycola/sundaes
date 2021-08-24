@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { OrderDetailsProvider } from '../../../contexts/OrderDetails';
 import Options from '../Options';
 import OrderEntry from '../OrderEntry';
+import { WorkflowProvider } from '../../../contexts/Workflow';
 
 test('update scoop subtotal when scoops change', async () => {
 	render(<Options optionType="scoops" />);
@@ -62,15 +63,15 @@ test('update toppings subtotal when toppings change', async () => {
 });
 
 describe('grand total', () => {
-	test('grand total starts at $0.00', async () => {
-		render(<OrderEntry />);
-		const grandTotal = await screen.findByTestId('grand-total');
-		expect(grandTotal).toHaveTextContent('Grand Total: $0.00');
-	});
-
 	test('grand total updates properly if scoop is added first', async () => {
-		render(<OrderEntry />);
+		render(
+			<WorkflowProvider>
+				<OrderEntry />
+			</WorkflowProvider>
+		);
 		const grandTotal = await screen.findByTestId('grand-total');
+
+		expect(grandTotal).toHaveTextContent('Grand Total: $0.00');
 		const vanillaInput = await screen.findByRole('spinbutton', { name: 'Vanilla' });
 
 		userEvent.clear(vanillaInput);
@@ -84,7 +85,11 @@ describe('grand total', () => {
 	});
 
 	test('grand total updates properly if topping is added first', async () => {
-		render(<OrderEntry />);
+		render(
+			<WorkflowProvider>
+				<OrderEntry />
+			</WorkflowProvider>
+		);
 		const grandTotal = await screen.findByTestId('grand-total');
 
 		const hotFudge = await screen.findByTestId('toppings-Hot fudge');
@@ -100,7 +105,11 @@ describe('grand total', () => {
 	});
 
 	test('grand total updates properly if item is removed', async () => {
-		render(<OrderEntry />);
+		render(
+			<WorkflowProvider>
+				<OrderEntry />
+			</WorkflowProvider>
+		);
 		const grandTotal = await screen.findByTestId('grand-total');
 
 		const hotFudge = await screen.findByTestId('toppings-Hot fudge');
