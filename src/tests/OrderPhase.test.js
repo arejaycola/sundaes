@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { queryByText, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import App from '../App';
@@ -41,9 +41,16 @@ test('order phases for happy path', async () => {
 	const confirmOrderButton = screen.getByRole('button', { name: 'Confirm Order' });
 	userEvent.click(confirmOrderButton);
 
+	/* Make sure the loading text is displayed while waiting on server */
+	const loadingText = screen.getByText('Loading...');
+	expect(loadingText).toBeInTheDocument();
+	
 	// confirm order number on confirmation page
 	const orderNumber = await screen.findByText('Your order number is #8675309');
 	expect(orderNumber).toBeInTheDocument();
+
+	const notLoadingText = screen.queryByText('Loading...');
+	expect(notLoadingText).not.toBeInTheDocument();
 
 	// click new order button on confirmation page
 	const newOrderButton = await screen.findByRole('button', { name: 'Create new order' });
@@ -55,4 +62,10 @@ test('order phases for happy path', async () => {
 
 	const toppingsSubtotal = await screen.findByText('Toppings total: $', { exact: false });
 	expect(toppingsSubtotal).toHaveTextContent('0.00');
+
+	/* Wait for items to appear so that Testing Library doesn't get angry */
+	await screen.findByRole('spinbutton', { name: 'Vanilla' });
+	// await screen.findByRole('checkbox', { name: 'Cherries' });
 });
+
+test('Loading text appears while waiting for server response', () => {});
