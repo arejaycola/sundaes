@@ -42,9 +42,9 @@ test('order phases for happy path', async () => {
 	userEvent.click(confirmOrderButton);
 
 	/* Make sure the loading text is displayed while waiting on server */
-	const loadingText = screen.getByText('Loading...');
+	const loadingText = await screen.findByText('Loading...');
 	expect(loadingText).toBeInTheDocument();
-	
+
 	// confirm order number on confirmation page
 	const orderNumber = await screen.findByText('Your order number is #8675309');
 	expect(orderNumber).toBeInTheDocument();
@@ -68,4 +68,20 @@ test('order phases for happy path', async () => {
 	// await screen.findByRole('checkbox', { name: 'Cherries' });
 });
 
-test('Loading text appears while waiting for server response', () => {});
+test('Toppings are not displayed if none are selected', async() => {
+	//render app
+	render(<App />);
+
+	//add ice cream scoops and toppings
+	const vanillaInput = await screen.findByRole('spinbutton', { name: 'Vanilla' });
+
+	userEvent.clear(vanillaInput);
+	userEvent.type(vanillaInput, '2');
+
+	// find and click order button
+	const orderButton = await screen.findByRole('button', { name: 'Order Sundae!' });
+	userEvent.click(orderButton);
+
+	const toppingsTotal = screen.queryByText(/Toppings:/i);
+	expect(toppingsTotal).not.toBeInTheDocument();
+});
