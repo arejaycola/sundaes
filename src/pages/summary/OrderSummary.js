@@ -4,8 +4,7 @@ import SummaryForm from './SummaryForm';
 const OrderSummary = () => {
 	const [orderDetails] = useOrderDetails();
 
-	const toppingsCount = orderDetails.toppings.size;
-	return toppingsCount > 0 ? (
+	const scoopsSummary = (
 		<>
 			<h2>Order Summary: </h2>
 			<h3>Scoops: {orderDetails.totals.scoops}</h3>
@@ -18,8 +17,11 @@ const OrderSummary = () => {
 					);
 				})}
 			</ul>
-			<br />
+		</>
+	);
 
+	const toppingsSummary = orderDetails.toppings.size > 0 && (
+		<>
 			<h2>Toppings: {orderDetails.totals.toppings}</h2>
 			<ul>
 				{[...orderDetails.toppings.keys()].map((topping) => {
@@ -30,23 +32,16 @@ const OrderSummary = () => {
 					);
 				})}
 			</ul>
-			<SummaryForm />
 		</>
-	) : (
+	);
+
+	return (
 		<>
-			<h2>Order Summary: </h2>
-			<h3>Scoops: {orderDetails.totals.scoops}</h3>
-			<ul>
-				{[...orderDetails.scoops.keys()].map((scoop) => {
-					return (
-						<li key={scoop}>
-							{orderDetails.scoops.get(scoop)} {scoop}
-						</li>
-					);
-				})}
-			</ul>
+			{scoopsSummary}
+			{toppingsSummary}
 			<SummaryForm />
 		</>
 	);
+
 };
 export default OrderSummary;
