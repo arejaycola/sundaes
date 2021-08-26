@@ -12,7 +12,7 @@ const OrderSummary = () => {
 			<ul>
 				{[...orderDetails.scoops.keys()].map((scoop) => {
 					return (
-						<li>
+						<li key={scoop}>
 							{orderDetails.scoops.get(scoop)} {scoop}
 						</li>
 					);
@@ -24,7 +24,7 @@ const OrderSummary = () => {
 			<ul>
 				{[...orderDetails.toppings.keys()].map((topping) => {
 					return (
-						<li>
+						<li key={topping}>
 							{orderDetails.scoops.get(topping)} {topping}
 						</li>
 					);
@@ -39,7 +39,7 @@ const OrderSummary = () => {
 			<ul>
 				{[...orderDetails.scoops.keys()].map((scoop) => {
 					return (
-						<li>
+						<li key={scoop}>
 							{orderDetails.scoops.get(scoop)} {scoop}
 						</li>
 					);
