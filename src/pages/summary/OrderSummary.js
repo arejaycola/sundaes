@@ -45,6 +45,7 @@ const OrderSummary = () => {
 					);
 				})}
 			</ul>
+			<SummaryForm />
 		</>
 	);
 };
