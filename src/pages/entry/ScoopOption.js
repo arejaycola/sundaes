@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Form from 'react-bootstrap/Form';
 
 const ScoopOptions = ({ name, imagePath, updateItemCount }) => {
+	const [invalidOption, setInvalidOption] = useState(false);
+
 	const handleChange = (event) => {
 		updateItemCount(name, event.target.value);
+		event.target.value < 0 ? setInvalidOption(true) : setInvalidOption(false);
 	};
 
 	return (
@@ -16,7 +19,8 @@ const ScoopOptions = ({ name, imagePath, updateItemCount }) => {
 					{name}
 				</Form.Label>
 				<Col xs="5" style={{ textAlign: 'left' }}>
-					<Form.Control type="number" defaultValue={0} onChange={handleChange} />
+					{/* <input type="number" defaultValue={0} role='spinbutton' style={{ border: 'red', borderWidth: '10px', outline: 'red' }} onChange={handleChange} /> */}
+					<Form.Control style={invalidOption ? { border: '1px solid red' } : null} type="number" defaultValue={0} onChange={handleChange} />
 				</Col>
 			</Form.Group>
 		</Col>

@@ -128,4 +128,26 @@ describe('grand total', () => {
 		userEvent.click(hotFudge);
 		expect(grandTotal).toHaveTextContent('0.00');
 	});
+
+	test('invalid scoops (< 0) should not allow an order to complete', async () => {
+		render(
+			<WorkflowProvider>
+				<OrderEntry />
+			</WorkflowProvider>
+		);
+
+		const vanillaInput = await screen.findByRole('spinbutton', { name: 'Vanilla' });
+
+		userEvent.clear(vanillaInput);
+		userEvent.type(vanillaInput, '-1');
+
+		const orderButton = await screen.findByRole('button', { name: 'Order Sundae!' });
+		expect(vanillaInput).toHaveStyle("border: 1px solid red");
+		expect(orderButton).toBeDisabled();
+
+		userEvent.clear(vanillaInput);
+		userEvent.type(vanillaInput, '1');
+		expect(vanillaInput).not.toHaveStyle('border: 1px solid red');
+		expect(orderButton).toBeEnabled();
+	});
 });
