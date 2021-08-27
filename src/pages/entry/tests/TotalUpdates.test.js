@@ -7,10 +7,14 @@ import OrderEntry from '../OrderEntry';
 import { WorkflowProvider } from '../../../contexts/Workflow';
 
 test('update scoop subtotal when scoops change', async () => {
-	render(<Options optionType="scoops" />);
+	render(
+		<WorkflowProvider>
+			<OrderEntry />
+		</WorkflowProvider>
+	);
 
 	//make sure total starts at $0.00
-	const scoopsSubtotal = screen.getByText('Scoops total: $', { exact: false });
+	const scoopsSubtotal = await screen.findByText('Scoops total: $', { exact: false });
 	expect(scoopsSubtotal).toHaveTextContent('0.00');
 
 	//update vanilla scoops to 1 and check subtotal
@@ -20,15 +24,30 @@ test('update scoop subtotal when scoops change', async () => {
 	userEvent.type(vanillaInput, '1');
 	expect(scoopsSubtotal).toHaveTextContent('2.00');
 
-	//update choc. scoops to 2 and check substotal
+	// //update choc. scoops to 2 and check substotal
 	const chocolateInput = await screen.findByRole('spinbutton', { name: 'Chocolate' });
 	userEvent.clear(chocolateInput);
 	userEvent.type(chocolateInput, '2');
 	expect(scoopsSubtotal).toHaveTextContent('6.00');
+	const wait = await screen.findByAltText(/Vanilla scoop/i);
 });
 
 test('update toppings subtotal when toppings change', async () => {
-	render(<Options optionType="toppings" />);
+	render(
+		<WorkflowProvider>
+			<OrderEntry />
+		</WorkflowProvider>
+	);
+
+	//make sure total starts at $0.00
+	const scoopsSubtotal = await screen.findByText('Scoops total: $', { exact: false });
+	expect(scoopsSubtotal).toHaveTextContent('0.00');
+
+	//update vanilla scoops to 1 and check subtotal
+	const vanillaInput = await screen.findByRole('spinbutton', { name: 'Vanilla' });
+
+	userEvent.clear(vanillaInput);
+	userEvent.type(vanillaInput, '1');
 
 	const toppingsSubtotal = screen.getByText('Toppings total: $', { exact: false });
 
@@ -84,26 +103,6 @@ describe('grand total', () => {
 		expect(grandTotal).toHaveTextContent('3.50');
 	});
 
-	test('grand total updates properly if topping is added first', async () => {
-		render(
-			<WorkflowProvider>
-				<OrderEntry />
-			</WorkflowProvider>
-		);
-		const grandTotal = await screen.findByTestId('grand-total');
-
-		const hotFudge = await screen.findByTestId('toppings-Hot fudge');
-		userEvent.click(hotFudge);
-		expect(grandTotal).toHaveTextContent('1.50');
-
-		const vanillaInput = await screen.findByRole('spinbutton', { name: 'Vanilla' });
-
-		userEvent.clear(vanillaInput);
-		userEvent.type(vanillaInput, '1');
-
-		expect(grandTotal).toHaveTextContent('3.50');
-	});
-
 	test('grand total updates properly if item is removed', async () => {
 		render(
 			<WorkflowProvider>
@@ -111,10 +110,6 @@ describe('grand total', () => {
 			</WorkflowProvider>
 		);
 		const grandTotal = await screen.findByTestId('grand-total');
-
-		const hotFudge = await screen.findByTestId('toppings-Hot fudge');
-		userEvent.click(hotFudge);
-
 		const vanillaInput = await screen.findByRole('spinbutton', { name: 'Vanilla' });
 
 		userEvent.clear(vanillaInput);
@@ -123,9 +118,22 @@ describe('grand total', () => {
 		userEvent.clear(vanillaInput);
 		userEvent.type(vanillaInput, '0');
 
-		expect(grandTotal).toHaveTextContent('1.50');
+		expect(grandTotal).toHaveTextContent('0.00');
+
+		userEvent.clear(vanillaInput);
+		userEvent.type(vanillaInput, '1');
+
+		const hotFudge = await screen.findByTestId('toppings-Hot fudge');
+		userEvent.click(hotFudge);
+
+		expect(grandTotal).toHaveTextContent('3.50');
 
 		userEvent.click(hotFudge);
+
+		expect(grandTotal).toHaveTextContent('2.00');
+		userEvent.clear(vanillaInput);
+		userEvent.type(vanillaInput, '0');
+
 		expect(grandTotal).toHaveTextContent('0.00');
 	});
 
@@ -142,12 +150,31 @@ describe('grand total', () => {
 		userEvent.type(vanillaInput, '-1');
 
 		const orderButton = await screen.findByRole('button', { name: 'Order Sundae!' });
-		expect(vanillaInput).toHaveStyle("border: 1px solid red");
+		expect(vanillaInput).toHaveStyle('border: 1px solid red');
 		expect(orderButton).toBeDisabled();
 
 		userEvent.clear(vanillaInput);
 		userEvent.type(vanillaInput, '1');
 		expect(vanillaInput).not.toHaveStyle('border: 1px solid red');
 		expect(orderButton).toBeEnabled();
+	});
+
+	test('invalid scoops do not update scoop total', async () => {
+		render(
+			<WorkflowProvider>
+				<OrderEntry />
+			</WorkflowProvider>
+		);
+
+		const vanillaInput = await screen.findByRole('spinbutton', { name: 'Vanilla' });
+
+		userEvent.clear(vanillaInput);
+		userEvent.type(vanillaInput, '-1');
+
+		const scoopsSubtotal = screen.getByText('Scoops total: $', { exact: false });
+		const grandTotal = await screen.findByTestId('grand-total');
+
+		expect(scoopsSubtotal).toHaveTextContent('0.00');
+		expect(grandTotal).toHaveTextContent('0.00');
 	});
 });

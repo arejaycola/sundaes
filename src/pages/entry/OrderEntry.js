@@ -4,32 +4,33 @@ import { useWorkflow } from '../../contexts/Workflow';
 import Options from './Options';
 const OrderEntry = () => {
 	const [orderDetails, updateItemCount, reset] = useOrderDetails();
+	const [numScoops, setNumScoops] = useState(orderDetails.scoops.size);
 	const { setOrderPhase } = useWorkflow();
-	const [validInput, setValidInput] = useState(true);
+	const [validInputs, setValidInputs] = useState(true);
 	useEffect(() => {
 		/* Reset the count */
 		reset();
 	}, []);
 
-	const numOfScoops = orderDetails.scoops.size;
-
 	useEffect(() => {
 		[...orderDetails.scoops.values()].map((scoop) => {
 			if (scoop < 0) {
-				setValidInput(false);
+				setValidInputs(false);
 			} else {
-				setValidInput(true);
+				setValidInputs(true);
 			}
 			return null;
 		});
+		console.log(orderDetails.scoops);
+		setNumScoops(orderDetails.scoops.size);
 	}, [orderDetails]);
 
 	return (
 		<>
-			<Options optionType="scoops" />
-			<Options optionType="toppings" />
-			<h2 data-testid="grand-total">Grand Total: {orderDetails.totals.grandTotal}</h2>
-			<button disabled={numOfScoops > 0 && validInput ? null : 'disabled'} onClick={() => setOrderPhase('review')}>
+			<Options optionType="scoops" validInputs={validInputs} numScoops={numScoops} />
+			<Options optionType="toppings" validInputs={validInputs} numScoops={numScoops} />
+			<h2 data-testid="grand-total">Grand Total: {validInputs ? orderDetails.totals.grandTotal : '$0.00'}</h2>
+			<button disabled={numScoops > 0 && validInputs ? null : 'disabled'} onClick={() => setOrderPhase('review')}>
 				Order Sundae!
 			</button>
 		</>

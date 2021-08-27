@@ -8,7 +8,7 @@ import { pricePerItem } from '../../constants';
 import { useOrderDetails } from '../../contexts/OrderDetails';
 import { formatCurrency } from '../../utilities';
 
-const Options = ({ optionType }) => {
+const Options = ({ optionType, validInputs, numScoops }) => {
 	//optionType is 'scoops' or 'toppings'
 	const [items, setItems] = useState([]);
 	const [error, setError] = useState(false);
@@ -38,6 +38,8 @@ const Options = ({ optionType }) => {
 				name={item.name}
 				imagePath={item.imagePath}
 				updateItemCount={(itemName, newItemCount) => updateItemCount(itemName, newItemCount, optionType)}
+				validInputs={validInputs}
+				numScoops={numScoops}
 			/>
 		);
 	});
@@ -46,7 +48,7 @@ const Options = ({ optionType }) => {
 			<h2>{title}</h2>
 			<p>{formatCurrency(pricePerItem[optionType])} each</p>
 			<p>
-				{title} total: {orderDetails.totals[optionType]}
+				{title} total: {validInputs ? orderDetails.totals[optionType] : '$0.00'}
 			</p>
 			<Row>{optionItems}</Row>
 		</>
